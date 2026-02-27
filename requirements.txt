@@ -3,3 +3,5 @@ vaderSentiment>=3.3.2
 rich>=13.0
 certifi
 pytest>=8.0
+pandas>=2.0
+moviepy>=1.0
