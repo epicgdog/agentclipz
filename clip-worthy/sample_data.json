@@ -1,0 +1,38 @@
+{
+  "transcript": [
+    {"text": "Hey everyone, welcome to the stream.", "start": 0.0, "end": 2.5, "is_sentence_start": true},
+    {"text": "Thanks for tuning in.", "start": 2.5, "end": 4.0, "is_sentence_start": true},
+    {"text": "Today we're playing some games.", "start": 4.0, "end": 6.2, "is_sentence_start": true},
+    {"text": "Let me know in chat what you want to see.", "start": 6.2, "end": 9.0, "is_sentence_start": true},
+    {"text": "Oh wow, that was insane.", "start": 42.0, "end": 44.5, "is_sentence_start": true},
+    {"text": "I cannot believe that just happened.", "start": 44.5, "end": 47.0, "is_sentence_start": true},
+    {"text": "Chat is going crazy right now.", "start": 47.0, "end": 49.2, "is_sentence_start": true},
+    {"text": "Alright, let's keep going.", "start": 78.0, "end": 80.5, "is_sentence_start": true}
+  ],
+  "chat_activity": [
+    {"timestamp": 0.0, "intensity": 0.2},
+    {"timestamp": 10.0, "intensity": 0.3},
+    {"timestamp": 20.0, "intensity": 0.4},
+    {"timestamp": 30.0, "intensity": 0.5},
+    {"timestamp": 40.0, "intensity": 0.7},
+    {"timestamp": 45.0, "intensity": 0.95},
+    {"timestamp": 50.0, "intensity": 0.9},
+    {"timestamp": 60.0, "intensity": 0.6},
+    {"timestamp": 70.0, "intensity": 0.4},
+    {"timestamp": 80.0, "intensity": 0.5},
+    {"timestamp": 90.0, "intensity": 0.3},
+    {"timestamp": 100.0, "intensity": 0.2},
+    {"timestamp": 110.0, "intensity": 0.1}
+  ],
+  "streamer_emotions": [
+    {"timestamp": 0.0, "label": "Calm", "confidence": 0.6},
+    {"timestamp": 15.0, "label": "Interested", "confidence": 0.5},
+    {"timestamp": 30.0, "label": "Happy", "confidence": 0.6},
+    {"timestamp": 42.0, "label": "Surprised", "confidence": 0.85},
+    {"timestamp": 45.0, "label": "Excited", "confidence": 0.92},
+    {"timestamp": 48.0, "label": "Excited", "confidence": 0.88},
+    {"timestamp": 55.0, "label": "Amused", "confidence": 0.7},
+    {"timestamp": 70.0, "label": "Neutral", "confidence": 0.5},
+    {"timestamp": 85.0, "label": "Happy", "confidence": 0.55}
+  ]
+}

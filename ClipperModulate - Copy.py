@@ -23,9 +23,7 @@ from matplotlib.patches import Rectangle
 # ============================================================
 # CONFIG
 # ============================================================
-MODULATE_API_KEY = os.environ.get("MODULATE_API_KEY")
-if not MODULATE_API_KEY:
-    raise EnvironmentError("MODULATE_API_KEY environment variable not set. Run: $env:MODULATE_API_KEY='your-key'")
+MODULATE_API_KEY = os.environ.get("MODULATE_API_KEY", "97fa1c48-12c7-4264-8ab3-fbe307a9f189")
 BATCH_URL = "https://modulate-developer-apis.com/api/velma-2-stt-batch"
 STREAM_URL = "wss://modulate-developer-apis.com/api/velma-2-stt-streaming"
 # All 26 emotions Modulate can return
@@ -134,6 +132,54 @@ class ClipCandidate:
     @property
     def duration_ms(self) -> int:
         return self.end_ms - self.start_ms
+
+
+def save_clip_transcript(
+    clip: ClipCandidate,
+    utterances: list,
+    clip_index: int,
+    output_dir: str,
+):
+    """
+    Save the transcript for a clip as a JSON file.
+    Creates a 'transcripts' subdirectory if it doesn't exist.
+    """
+    transcripts_dir = os.path.join(output_dir, "transcripts")
+    os.makedirs(transcripts_dir, exist_ok=True)
+    
+    # Filter utterances within this clip
+    clip_utts = [u for u in utterances if u.start_ms < clip.end_ms and u.end_ms > clip.start_ms]
+    
+    transcript_data = {
+        "clip_index": clip_index,
+        "start_ms": clip.start_ms,
+        "end_ms": clip.end_ms,
+        "duration_ms": clip.duration_ms,
+        "trigger_emotion": clip.trigger_emotion,
+        "trigger_type": clip.trigger_type,
+        "peak_score": clip.peak_score,
+        "utterances": [
+            {
+                "text": u.text,
+                "start_ms": u.start_ms,
+                "end_ms": u.end_ms,
+                "duration_ms": u.duration_ms,
+                "emotion": u.emotion,
+                "speaker": u.speaker,
+                "relative_start_ms": u.start_ms - clip.start_ms,
+                "relative_end_ms": u.end_ms - clip.start_ms,
+            }
+            for u in clip_utts
+        ],
+        "full_transcript": " ".join(u.text for u in clip_utts if u.text),
+    }
+    
+    json_path = os.path.join(transcripts_dir, f"clip_{clip_index}_transcript.json")
+    with open(json_path, "w", encoding="utf-8") as f:
+        json.dump(transcript_data, f, indent=2, ensure_ascii=False)
+    
+    print(f"Transcript saved: {json_path}")
+
 # ============================================================
 # STEP 1: EXTRACT AUDIO FROM VIDEO (for batch processing)
 # ============================================================
@@ -651,6 +697,48 @@ def accumulate_emotions(utterances: list[Utterance]) -> dict[str, int]:
 # ============================================================
 # STEP 5: CUT THE CLIP FROM VIDEO
 # ============================================================
+def generate_srt_subtitles(utterances: list, start_ms: int, end_ms: int, output_path: str) -> str:
+    """
+    Generate an SRT subtitle file from utterances for a clip.
+    Returns the path to the SRT file.
+    """
+    # Filter utterances within this clip
+    clip_utts = [u for u in utterances if u.start_ms >= start_ms and u.end_ms <= end_ms]
+    
+    if not clip_utts:
+        return None
+    
+    def ms_to_srt_time(ms: int) -> str:
+        """Convert milliseconds to SRT timestamp format (HH:MM:SS,mmm)"""
+        hours = ms // 3600000
+        minutes = (ms % 3600000) // 60000
+        seconds = (ms % 60000) // 1000
+        millis = ms % 1000
+        return f"{hours:02d}:{minutes:02d}:{seconds:02d},{millis:03d}"
+    
+    srt_content = []
+    for i, u in enumerate(clip_utts, 1):
+        # Calculate relative time within the clip
+        rel_start_ms = u.start_ms - start_ms
+        rel_end_ms = u.end_ms - start_ms
+        
+        start_time = ms_to_srt_time(rel_start_ms)
+        end_time = ms_to_srt_time(rel_end_ms)
+        
+        # Clean the text (remove special chars that might break ffmpeg)
+        text = u.text.replace("'", "'").replace('"', "'").replace("\\", "")
+        
+        srt_content.append(f"{i}")
+        srt_content.append(f"{start_time} --> {end_time}")
+        srt_content.append(text)
+        srt_content.append("")  # Empty line between entries
+    
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write("\n".join(srt_content))
+    
+    return output_path
+
+
 def cut_clip_from_video(
     video_path: str,
     start_ms: int,
@@ -658,57 +746,84 @@ def cut_clip_from_video(
     output_path: str,
     utterances: list = None,
     show_emotions: bool = False,
+    show_subtitles: bool = False,
 ):
     """
     Use ffmpeg to cut a clip from the source video.
     If show_emotions=True, overlay emotion timestamps on the video.
+    If show_subtitles=True, burn in subtitles from transcription.
     """
     start_s = start_ms / 1000
     duration_s = (end_ms - start_ms) / 1000
     
-    if show_emotions and utterances:
-        # Filter utterances within this clip
-        clip_utts = [u for u in utterances if u.start_ms >= start_ms and u.end_ms <= end_ms]
+    if utterances and (show_emotions or show_subtitles):
+        # Filter utterances within this clip (include overlapping utterances)
+        clip_utts = [u for u in utterances if u.start_ms < end_ms and u.end_ms > start_ms]
         
         if clip_utts:
-            # Build ffmpeg drawtext filter for emotion overlays
             filter_parts = []
-            for u in clip_utts:
-                if u.emotion:
-                    # Calculate relative time within the clip
-                    rel_start = (u.start_ms - start_ms) / 1000
-                    rel_end = (u.end_ms - start_ms) / 1000
-                    
-                    # Color based on emotion type
-                    if u.emotion in HIGH_ENERGY_EMOTIONS:
-                        color = "red"
-                    elif u.emotion in LOW_ENERGY_EMOTIONS:
-                        color = "gray"
-                    else:
-                        color = "yellow"
-                    
-                    # Drawtext filter: show emotion label at bottom of screen
-                    filter_parts.append(
-                        f"drawtext=text='{u.emotion}':fontsize=24:fontcolor={color}:"
-                        f"x=(w-text_w)/2:y=h-50:enable='between(t,{rel_start:.2f},{rel_end:.2f})'"
-                    )
+            srt_path = None
+            
+            # Generate subtitles if requested
+            if show_subtitles:
+                srt_path = tempfile.mktemp(suffix=".srt")
+                generate_srt_subtitles(utterances, start_ms, end_ms, srt_path)
+                # Escape Windows path for ffmpeg filter
+                srt_escaped = srt_path.replace("\\", "/").replace(":", "\\:")
+                # Subtitle filter with styling
+                filter_parts.append(
+                    f"subtitles='{srt_escaped}':force_style='FontSize=20,FontName=Arial,PrimaryColour=&HFFFFFF,OutlineColour=&H000000,Outline=2,Shadow=1,MarginV=60'"
+                )
+            
+            # Add emotion overlay if requested
+            if show_emotions:
+                for u in clip_utts:
+                    if u.emotion:
+                        rel_start = (u.start_ms - start_ms) / 1000
+                        rel_end = (u.end_ms - start_ms) / 1000
+                        
+                        if u.emotion in HIGH_ENERGY_EMOTIONS:
+                            color = "red"
+                        elif u.emotion in LOW_ENERGY_EMOTIONS:
+                            color = "gray"
+                        else:
+                            color = "yellow"
+                        
+                        # Emotion label at top of screen (subtitles are at bottom)
+                        filter_parts.append(
+                            f"drawtext=text='{u.emotion}':fontsize=24:fontcolor={color}:"
+                            f"x=(w-text_w)/2:y=30:enable='between(t,{rel_start:.2f},{rel_end:.2f})'"
+                        )
             
             if filter_parts:
                 filter_str = ",".join(filter_parts)
+                # Use -ss BEFORE -i for input seeking - this makes video start at time 0
+                # matching our SRT timestamps
                 cmd = [
-                    "ffmpeg", "-i", video_path,
-                    "-ss", str(start_s),
+                    "ffmpeg",
+                    "-ss", str(start_s),  # Input seeking - seek first, then read
+                    "-i", video_path,
                     "-t", str(duration_s),
                     "-vf", filter_str,
-                    "-c:a", "copy",
+                    "-c:a", "aac",
                     "-y",
                     output_path,
                 ]
                 result = subprocess.run(cmd, capture_output=True, text=True)
+                
+                # Cleanup temp SRT file
+                if srt_path and os.path.exists(srt_path):
+                    os.remove(srt_path)
+                
                 if result.returncode != 0:
-                    print(f"Warning: Overlay failed, falling back to simple cut: {result.stderr[:200]}")
+                    print(f"Warning: Overlay/subtitles failed, falling back to simple cut: {result.stderr[:300]}")
                 else:
-                    print(f"Clip saved with emotion overlay: {output_path} ({duration_s:.1f}s)")
+                    features = []
+                    if show_subtitles:
+                        features.append("subtitles")
+                    if show_emotions:
+                        features.append("emotions")
+                    print(f"Clip saved with {'+'.join(features)}: {output_path} ({duration_s:.1f}s)")
                     return
     
     # Simple cut without overlay (faster)
@@ -782,11 +897,12 @@ def process_video(
             # Adjust clip boundaries based on trim suggestion
             clip.start_ms += int(trim_start_s * 1000)
             clip.end_ms = clip.start_ms + int((trim_end_s - trim_start_s) * 1000)
-    # Step 5: Cut clips from original video
+    # Step 5: Cut clips from original video and save transcripts
     print("\\n[5/5] Cutting clips from video...")
     for i, clip in enumerate(clips):
         clip_path = os.path.join(output_dir, f"clip_{i+1}.mp4")
-        cut_clip_from_video(video_path, clip.start_ms, clip.end_ms, clip_path, utterances, show_emotions=True)
+        cut_clip_from_video(video_path, clip.start_ms, clip.end_ms, clip_path, utterances, show_emotions=False, show_subtitles=True)
+        save_clip_transcript(clip, utterances, i + 1, output_dir)
     # Cleanup temp audio
     if os.path.exists(audio_path):
         os.remove(audio_path)
@@ -1084,10 +1200,19 @@ if __name__ == "__main__":
         video = sys.argv[1]
         out_dir = sys.argv[2] if len(sys.argv) > 2 and not sys.argv[2].startswith("--") else "./clips"
         test_mode = "--test" in sys.argv
-        max_chunks = 5 if test_mode else None
         
-        if test_mode:
-            print("*** TEST MODE: Processing only first 5 chunks (25 minutes) ***\\n")
+        # Check for --chunks N argument
+        max_chunks = None
+        for i, arg in enumerate(sys.argv):
+            if arg == "--chunks" and i + 1 < len(sys.argv):
+                max_chunks = int(sys.argv[i + 1])
+                break
+        
+        if max_chunks is None and test_mode:
+            max_chunks = 5
+        
+        if max_chunks:
+            print(f"*** TEST MODE: Processing only first {max_chunks} chunk(s) ({max_chunks * 5} minutes) ***\\n")
         
         clips, emotion_totals = process_video(video, out_dir, custom_thresholds, max_chunks=max_chunks)
         
