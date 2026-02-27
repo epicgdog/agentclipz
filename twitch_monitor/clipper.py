@@ -478,6 +478,173 @@ def accumulate_emotions(utterances: list[Utterance]) -> dict[str, int]:
     return dict(sorted(totals.items(), key=lambda x: -x[1]))
 
 
+# -- Subtitle generation ----------------------------------------------------
+
+def _ms_to_srt_time(ms: int) -> str:
+    """Convert milliseconds to SRT timestamp format (HH:MM:SS,mmm)."""
+    if ms < 0:
+        ms = 0
+    hours = ms // 3600000
+    ms %= 3600000
+    minutes = ms // 60000
+    ms %= 60000
+    seconds = ms // 1000
+    millis = ms % 1000
+    return f"{hours:02d}:{minutes:02d}:{seconds:02d},{millis:03d}"
+
+
+def generate_srt_from_transcript(
+    transcript_path: str,
+    output_path: str | None = None,
+    use_relative_times: bool = True,
+) -> str:
+    """
+    Convert a clip transcript JSON to SRT subtitle format.
+    
+    Args:
+        transcript_path: Path to the transcript JSON file
+        output_path: Optional output path for SRT file (defaults to same dir as transcript)
+        use_relative_times: If True, use relative_start_ms/relative_end_ms (for clipped videos).
+                           If False, use absolute start_ms/end_ms.
+    
+    Returns:
+        Path to the generated SRT file
+    """
+    with open(transcript_path, "r", encoding="utf-8") as f:
+        transcript = json.load(f)
+    
+    utterances = transcript.get("utterances", [])
+    if not utterances:
+        raise ValueError(f"No utterances found in {transcript_path}")
+    
+    srt_lines = []
+    for i, utt in enumerate(utterances, start=1):
+        text = utt.get("text", "").strip()
+        if not text:
+            continue
+        
+        # Choose timing based on use_relative_times
+        if use_relative_times and "relative_start_ms" in utt:
+            start_ms = max(0, utt["relative_start_ms"])
+            end_ms = max(0, utt["relative_end_ms"])
+        else:
+            start_ms = utt.get("start_ms", 0)
+            end_ms = utt.get("end_ms", start_ms + utt.get("duration_ms", 2000))
+        
+        start_time = _ms_to_srt_time(start_ms)
+        end_time = _ms_to_srt_time(end_ms)
+        
+        srt_lines.append(f"{i}")
+        srt_lines.append(f"{start_time} --> {end_time}")
+        srt_lines.append(text)
+        srt_lines.append("")  # Blank line separator
+    
+    srt_content = "\n".join(srt_lines)
+    
+    if output_path is None:
+        output_path = transcript_path.replace(".json", ".srt")
+    
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write(srt_content)
+    
+    print(f"[clipper] SRT generated: {output_path} ({len(utterances)} subtitles)")
+    return output_path
+
+
+def burn_subtitles_to_video(
+    video_path: str,
+    srt_path: str,
+    output_path: str | None = None,
+    font_size: int = 24,
+    font_color: str = "white",
+    outline_color: str = "black",
+    outline_width: int = 2,
+    position: str = "bottom",  # "bottom", "top", "center"
+) -> str:
+    """
+    Burn subtitles into a video using ffmpeg.
+    
+    Args:
+        video_path: Path to the input video
+        srt_path: Path to the SRT subtitle file
+        output_path: Output path (defaults to video_path with '_subtitled' suffix)
+        font_size: Subtitle font size
+        font_color: Subtitle text color
+        outline_color: Subtitle outline/border color
+        outline_width: Outline thickness
+        position: Vertical position ("bottom", "top", "center")
+    
+    Returns:
+        Path to the output video with burned subtitles
+    """
+    if output_path is None:
+        base, ext = os.path.splitext(video_path)
+        output_path = f"{base}_subtitled{ext}"
+    
+    # Escape path for ffmpeg filter (Windows needs special handling)
+    # Replace backslashes with forward slashes and escape colons
+    srt_escaped = srt_path.replace("\\", "/").replace(":", "\\:")
+    
+    # Build subtitle filter with styling
+    margin_v = 30 if position == "bottom" else 30 if position == "top" else 0
+    alignment = 2 if position == "bottom" else 6 if position == "top" else 5
+    
+    # Use ASS styling for better control
+    subtitle_filter = (
+        f"subtitles='{srt_escaped}':"
+        f"force_style='FontSize={font_size},"
+        f"PrimaryColour=&H00FFFFFF,"  # White in ASS format (AABBGGRR)
+        f"OutlineColour=&H00000000,"  # Black outline
+        f"BorderStyle=1,"
+        f"Outline={outline_width},"
+        f"Shadow=1,"
+        f"MarginV={margin_v},"
+        f"Alignment={alignment}'"
+    )
+    
+    cmd = [
+        "ffmpeg", "-i", video_path,
+        "-vf", subtitle_filter,
+        "-c:a", "copy",
+        "-y", output_path,
+    ]
+    
+    print(f"[clipper] Burning subtitles into video...")
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    if result.returncode != 0:
+        raise RuntimeError(f"ffmpeg subtitle burn failed: {result.stderr}")
+    
+    print(f"[clipper] Subtitled video saved: {output_path}")
+    return output_path
+
+
+def add_subtitles_from_transcript(
+    video_path: str,
+    transcript_path: str,
+    output_path: str | None = None,
+    **subtitle_style,
+) -> str:
+    """
+    Convenience function: Generate SRT from transcript and burn into video.
+    
+    Args:
+        video_path: Input video path
+        transcript_path: Transcript JSON path
+        output_path: Output video path (optional)
+        **subtitle_style: Styling options passed to burn_subtitles_to_video
+    
+    Returns:
+        Path to the subtitled video
+    """
+    srt_path = generate_srt_from_transcript(transcript_path, use_relative_times=True)
+    
+    try:
+        return burn_subtitles_to_video(video_path, srt_path, output_path, **subtitle_style)
+    finally:
+        # Optionally clean up SRT file
+        pass  # Keep SRT for debugging/manual edits
+
+
 # -- Lightweight emotion-only analysis -------------------------------------
 
 def analyze_emotions(
