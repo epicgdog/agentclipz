@@ -29,7 +29,7 @@ import platform
 if TYPE_CHECKING:
     from .analytics import ChatAnalytics
 
-from .clipper import analyze_emotions
+from .clipper import analyze_emotions, _generate_srt_from_utterances, burn_subtitles_to_video
 
 logger = logging.getLogger(__name__)
 
@@ -111,6 +111,9 @@ class ClipTriggerConfig:
     stream_url: str | None = os.environ.get("TWITCH_STREAM_URL")
     modulate_api_key: str | None = os.environ.get("MODULATE_API_KEY")
     clip_output_dir: str = os.environ.get("CLIP_OUTPUT_DIR", "./clips")
+    burn_subtitles: bool = os.environ.get("BURN_SUBTITLES", "true").lower() == "true"
+    subtitle_font_size: int = int(os.environ.get("SUBTITLE_FONT_SIZE", "24"))
+    subtitle_position: str = os.environ.get("SUBTITLE_POSITION", "bottom")
 
     @property
     def segments_to_keep(self) -> int:
@@ -416,19 +419,48 @@ class ClipTrigger:
         return combined_path
 
     async def _process_clip(self, clip_path: str) -> None:
-        """Send the clip for emotion analysis (no editing/trimming), then return to IDLE."""
+        """Send the clip for emotion analysis, burn subtitles, then return to IDLE."""
         try:
             logger.info("[trigger] Analyzing emotions for clip: %s", clip_path)
             loop = asyncio.get_running_loop()
+            clip_dir = os.path.join(self.config.clip_output_dir, f"clip_{self.clip_count}")
             result = await loop.run_in_executor(
                 None,
                 analyze_emotions,
                 clip_path,
-                os.path.join(self.config.clip_output_dir, f"clip_{self.clip_count}"),
+                clip_dir,
             )
+            utterances = result.get("utterances", [])
             totals = result.get("emotion_totals", {})
             top = [(e, c) for e, c in totals.items() if c > 0][:3]
             summary = ", ".join(f"{e}({c})" for e, c in top) if top else "none"
+            
+            # Burn subtitles from Modulate transcription
+            if self.config.burn_subtitles and utterances:
+                logger.info("[trigger] Burning subtitles into clip...")
+                try:
+                    # Generate SRT from utterances (times are already clip-relative since clip starts at 0)
+                    srt_path = os.path.join(clip_dir, f"clip_{self.clip_count}.srt")
+                    _generate_srt_from_utterances(utterances, 0, float('inf'), srt_path)
+                    
+                    # Burn subtitles into video
+                    subtitled_path = clip_path.replace(".mp4", "_subtitled.mp4")
+                    await loop.run_in_executor(
+                        None,
+                        burn_subtitles_to_video,
+                        clip_path,
+                        srt_path,
+                        subtitled_path,
+                        self.config.subtitle_font_size,
+                        "white",
+                        "black",
+                        2,
+                        self.config.subtitle_position,
+                    )
+                    logger.info("[trigger] Subtitled clip saved: %s", subtitled_path)
+                except Exception:
+                    logger.exception("[trigger] Failed to burn subtitles")
+            
             self._last_clip_info = f"Clip #{self.clip_count}: {summary}"
         except Exception:
             logger.exception("[trigger] Error analyzing clip")

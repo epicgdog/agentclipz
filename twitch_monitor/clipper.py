@@ -453,21 +453,118 @@ def plot_emotion_distribution(
 
 # -- Clip cutting -----------------------------------------------------------
 
+def _generate_srt_from_utterances(
+    utterances: list,
+    clip_start_ms: int,
+    clip_end_ms: int,
+    output_path: str,
+) -> str:
+    """Generate SRT file directly from utterances list (not from JSON file)."""
+    # Filter utterances within clip range
+    clip_utts = [u for u in utterances if u.start_ms < clip_end_ms and u.end_ms > clip_start_ms]
+    
+    srt_lines = []
+    for i, u in enumerate(clip_utts, start=1):
+        text = u.text.strip() if hasattr(u, 'text') else str(u.get('text', '')).strip()
+        if not text:
+            continue
+        
+        # Get times - handle both Utterance objects and dicts
+        if hasattr(u, 'start_ms'):
+            start_ms = u.start_ms
+            end_ms = u.end_ms
+        else:
+            start_ms = u.get('start_ms', 0)
+            end_ms = u.get('end_ms', start_ms + u.get('duration_ms', 2000))
+        
+        # Convert to relative (clip-local) timestamps
+        rel_start = max(0, start_ms - clip_start_ms)
+        rel_end = max(0, end_ms - clip_start_ms)
+        
+        start_time = _ms_to_srt_time(rel_start)
+        end_time = _ms_to_srt_time(rel_end)
+        
+        srt_lines.append(f"{i}")
+        srt_lines.append(f"{start_time} --> {end_time}")
+        srt_lines.append(text)
+        srt_lines.append("")
+    
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write("\n".join(srt_lines))
+    
+    return output_path
+
+
 def cut_clip_from_video(
     video_path: str, start_ms: int, end_ms: int, output_path: str,
-    utterances: list | None = None, show_emotions: bool = False,
+    utterances: list | None = None,
+    burn_subtitles: bool = False,
+    font_size: int = 24,
+    position: str = "bottom",
 ):
+    """
+    Cut a clip from video, optionally burning subtitles directly from utterances.
+    
+    Args:
+        video_path: Source video path
+        start_ms: Start time in milliseconds
+        end_ms: End time in milliseconds  
+        output_path: Output clip path
+        utterances: List of Utterance objects (from Modulate transcription)
+        burn_subtitles: If True and utterances provided, burn subtitles into video
+        font_size: Subtitle font size
+        position: Subtitle position ("bottom", "top", "center")
+    """
     start_s = start_ms / 1000
     duration_s = (end_ms - start_ms) / 1000
-    cmd = [
-        "ffmpeg", "-i", video_path,
-        "-ss", str(start_s), "-t", str(duration_s),
-        "-c", "copy", "-y", output_path,
-    ]
-    result = subprocess.run(cmd, capture_output=True, text=True)
-    if result.returncode != 0:
-        raise RuntimeError(f"ffmpeg clip cut failed: {result.stderr}")
-    print(f"[clipper] Clip saved: {output_path} ({duration_s:.1f}s)")
+    
+    if burn_subtitles and utterances:
+        # Generate temp SRT from utterances
+        srt_path = tempfile.mktemp(suffix=".srt")
+        _generate_srt_from_utterances(utterances, start_ms, end_ms, srt_path)
+        
+        # Escape path for ffmpeg filter
+        srt_escaped = srt_path.replace("\\", "/").replace(":", "\\:")
+        
+        margin_v = 30 if position in ("bottom", "top") else 0
+        alignment = 2 if position == "bottom" else 6 if position == "top" else 5
+        
+        subtitle_filter = (
+            f"subtitles='{srt_escaped}':"
+            f"force_style='FontSize={font_size},"
+            f"PrimaryColour=&H00FFFFFF,"
+            f"OutlineColour=&H00000000,"
+            f"BorderStyle=1,Outline=2,Shadow=1,"
+            f"MarginV={margin_v},Alignment={alignment}'"
+        )
+        
+        cmd = [
+            "ffmpeg", "-i", video_path,
+            "-ss", str(start_s), "-t", str(duration_s),
+            "-vf", subtitle_filter,
+            "-c:a", "aac",
+            "-y", output_path,
+        ]
+        
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        
+        # Clean up temp SRT
+        if os.path.exists(srt_path):
+            os.remove(srt_path)
+        
+        if result.returncode != 0:
+            raise RuntimeError(f"ffmpeg clip+subtitle failed: {result.stderr}")
+        print(f"[clipper] Clip saved with subtitles: {output_path} ({duration_s:.1f}s)")
+    else:
+        cmd = [
+            "ffmpeg", "-i", video_path,
+            "-ss", str(start_s), "-t", str(duration_s),
+            "-c", "copy", "-y", output_path,
+        ]
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        if result.returncode != 0:
+            raise RuntimeError(f"ffmpeg clip cut failed: {result.stderr}")
+        print(f"[clipper] Clip saved: {output_path} ({duration_s:.1f}s)")
 
 
 def accumulate_emotions(utterances: list[Utterance]) -> dict[str, int]:
@@ -720,6 +817,9 @@ def process_video(
     thresholds: ClipThresholds | None = None,
     use_streaming: bool = False,
     max_chunks: int | None = None,
+    burn_subtitles: bool = False,
+    subtitle_font_size: int = 24,
+    subtitle_position: str = "bottom",
 ):
     os.makedirs(output_dir, exist_ok=True)
     print(f"[clipper] Processing: {video_path}")
@@ -746,7 +846,13 @@ def process_video(
 
     for i, clip in enumerate(clips):
         clip_path = os.path.join(output_dir, f"clip_{i+1}.mp4")
-        cut_clip_from_video(video_path, clip.start_ms, clip.end_ms, clip_path)
+        cut_clip_from_video(
+            video_path, clip.start_ms, clip.end_ms, clip_path,
+            utterances=utterances,
+            burn_subtitles=burn_subtitles,
+            font_size=subtitle_font_size,
+            position=subtitle_position,
+        )
 
     if os.path.exists(audio_path):
         os.remove(audio_path)
