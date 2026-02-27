@@ -1,0 +1,132 @@
+{
+  "clip_index": 2,
+  "start_ms": 211320,
+  "end_ms": 275320,
+  "duration_ms": 64000,
+  "trigger_emotion": "Excited",
+  "trigger_type": "per_emotion",
+  "peak_score": 6.1,
+  "utterances": [
+    {
+      "text": "Okay, okay. Boys and girls! Boys and girls, W's in the chat, W's in the chat, bro. Man, I miss y'all boys, bro, again, bro. Y'all know me, chat. Full-time streamer, streamer once, streaming once again.",
+      "start_ms": 200280,
+      "end_ms": 212700,
+      "duration_ms": 12420,
+      "emotion": "Excited",
+      "speaker": 2,
+      "relative_start_ms": -11040,
+      "relative_end_ms": 1380
+    },
+    {
+      "text": "At NYLIVES donated $1 through Super Chat.",
+      "start_ms": 212820,
+      "end_ms": 214860,
+      "duration_ms": 2040,
+      "emotion": "Neutral",
+      "speaker": 3,
+      "relative_start_ms": 1500,
+      "relative_end_ms": 3540
+    },
+    {
+      "text": "Um, boys and girls! Everybody in the stream, hit that like and sub button. Today is February 25th, 2026, 3:07 PM. And chat, we got y'all boys with a stream today. Another stream today.",
+      "start_ms": 214980,
+      "end_ms": 230820,
+      "duration_ms": 15840,
+      "emotion": "Excited",
+      "speaker": 2,
+      "relative_start_ms": 3660,
+      "relative_end_ms": 19500
+    },
+    {
+      "text": "I love Speed ASF.",
+      "start_ms": 231180,
+      "end_ms": 232380,
+      "duration_ms": 1200,
+      "emotion": "Excited",
+      "speaker": 3,
+      "relative_start_ms": 19860,
+      "relative_end_ms": 21060
+    },
+    {
+      "text": "You love me? Oh, thank you, thank you, thank you! Anyway, chat, today—today, chat, we'll be finally meeting Jephy, chat. We'll be finally—after all these long three years, we'll be finally meeting Jephy. You feel what I'm saying?",
+      "start_ms": 232800,
+      "end_ms": 247500,
+      "duration_ms": 14700,
+      "emotion": "Excited",
+      "speaker": 2,
+      "relative_start_ms": 21480,
+      "relative_end_ms": 36180
+    },
+    {
+      "text": "I am a fan and I'm 11 years old, I love you, Speed PLS.",
+      "start_ms": 247680,
+      "end_ms": 250860,
+      "duration_ms": 3180,
+      "emotion": "Excited",
+      "speaker": 3,
+      "relative_start_ms": 36360,
+      "relative_end_ms": 39540
+    },
+    {
+      "text": "You're a fan of yours, you're 11 years old. Thank you so much, pal! Bonauto chat, um, we're gonna be me and Jeffy... bro, why... yo bro, like, do y'all—they—ah!",
+      "start_ms": 251280,
+      "end_ms": 258540,
+      "duration_ms": 7260,
+      "emotion": "Excited",
+      "speaker": 2,
+      "relative_start_ms": 39960,
+      "relative_end_ms": 47220
+    },
+    {
+      "text": "Michelle (SMOVA12) donated $1.99 through Super Chat.",
+      "start_ms": 258600,
+      "end_ms": 262080,
+      "duration_ms": 3480,
+      "emotion": "Neutral",
+      "speaker": 3,
+      "relative_start_ms": 47280,
+      "relative_end_ms": 50760
+    },
+    {
+      "text": "Um.",
+      "start_ms": 262500,
+      "end_ms": 262740,
+      "duration_ms": 240,
+      "emotion": "Excited",
+      "speaker": 2,
+      "relative_start_ms": 51180,
+      "relative_end_ms": 51420
+    },
+    {
+      "text": "WSpeed.",
+      "start_ms": 263100,
+      "end_ms": 263880,
+      "duration_ms": 780,
+      "emotion": "Excited",
+      "speaker": 3,
+      "relative_start_ms": 51780,
+      "relative_end_ms": 52560
+    },
+    {
+      "text": "So chat, I love y’all boys, bro. Chat, I hope everybody—chat, we’re gonna do a quick IRL bit as well, and after the IRL bit, I’ma come back and do some games.",
+      "start_ms": 264300,
+      "end_ms": 273180,
+      "duration_ms": 8880,
+      "emotion": "Excited",
+      "speaker": 2,
+      "relative_start_ms": 52980,
+      "relative_end_ms": 61860
+    },
+    {
+      "text": "I think I’m gonna do some, um, I don’t even know. I wanna play like some few games today. I can already tell this is going to be a W stream.",
+      "start_ms": 273300,
+      "end_ms": 281880,
+      "duration_ms": 8580,
+      "emotion": "Excited",
+      "speaker": 3,
+      "relative_start_ms": 61980,
+      "relative_end_ms": 70560
+    }
+  ],
+  "full_transcript": "Okay, okay. Boys and girls! Boys and girls, W's in the chat, W's in the chat, bro. Man, I miss y'all boys, bro, again, bro. Y'all know me, chat. Full-time streamer, streamer once, streaming once again. At NYLIVES donated $1 through Super Chat. Um, boys and girls! Everybody in the stream, hit that like and sub button. Today is February 25th, 2026, 3:07 PM. And chat, we got y'all boys with a stream today. Another stream today. I love Speed ASF. You love me? Oh, thank you, thank you, thank you! Anyway, chat, today—today, chat, we'll be finally meeting Jephy, chat. We'll be finally—after all these long three years, we'll be finally meeting Jephy. You feel what I'm saying? I am a fan and I'm 11 years old, I love you, Speed PLS. You're a fan of yours, you're 11 years old. Thank you so much, pal! Bonauto chat, um, we're gonna be me and Jeffy... bro, why... yo bro, like, do y'all—they—ah! Michelle (SMOVA12) donated $1.99 through Super Chat. Um. WSpeed. So chat, I love y’all boys, bro. Chat, I hope everybody—chat, we’re gonna do a quick IRL bit as well, and after the IRL bit, I’ma come back and do some games. I think I’m gonna do some, um, I don’t even know. I wanna play like some few games today. I can already tell this is going to be a W stream."
+}

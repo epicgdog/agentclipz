@@ -132,6 +132,54 @@ class ClipCandidate:
     @property
     def duration_ms(self) -> int:
         return self.end_ms - self.start_ms
+
+
+def save_clip_transcript(
+    clip: ClipCandidate,
+    utterances: list,
+    clip_index: int,
+    output_dir: str,
+):
+    """
+    Save the transcript for a clip as a JSON file.
+    Creates a 'transcripts' subdirectory if it doesn't exist.
+    """
+    transcripts_dir = os.path.join(output_dir, "transcripts")
+    os.makedirs(transcripts_dir, exist_ok=True)
+    
+    # Filter utterances within this clip
+    clip_utts = [u for u in utterances if u.start_ms < clip.end_ms and u.end_ms > clip.start_ms]
+    
+    transcript_data = {
+        "clip_index": clip_index,
+        "start_ms": clip.start_ms,
+        "end_ms": clip.end_ms,
+        "duration_ms": clip.duration_ms,
+        "trigger_emotion": clip.trigger_emotion,
+        "trigger_type": clip.trigger_type,
+        "peak_score": clip.peak_score,
+        "utterances": [
+            {
+                "text": u.text,
+                "start_ms": u.start_ms,
+                "end_ms": u.end_ms,
+                "duration_ms": u.duration_ms,
+                "emotion": u.emotion,
+                "speaker": u.speaker,
+                "relative_start_ms": u.start_ms - clip.start_ms,
+                "relative_end_ms": u.end_ms - clip.start_ms,
+            }
+            for u in clip_utts
+        ],
+        "full_transcript": " ".join(u.text for u in clip_utts if u.text),
+    }
+    
+    json_path = os.path.join(transcripts_dir, f"clip_{clip_index}_transcript.json")
+    with open(json_path, "w", encoding="utf-8") as f:
+        json.dump(transcript_data, f, indent=2, ensure_ascii=False)
+    
+    print(f"Transcript saved: {json_path}")
+
 # ============================================================
 # STEP 1: EXTRACT AUDIO FROM VIDEO (for batch processing)
 # ============================================================
@@ -849,11 +897,12 @@ def process_video(
             # Adjust clip boundaries based on trim suggestion
             clip.start_ms += int(trim_start_s * 1000)
             clip.end_ms = clip.start_ms + int((trim_end_s - trim_start_s) * 1000)
-    # Step 5: Cut clips from original video
+    # Step 5: Cut clips from original video and save transcripts
     print("\\n[5/5] Cutting clips from video...")
     for i, clip in enumerate(clips):
         clip_path = os.path.join(output_dir, f"clip_{i+1}.mp4")
         cut_clip_from_video(video_path, clip.start_ms, clip.end_ms, clip_path, utterances, show_emotions=False, show_subtitles=True)
+        save_clip_transcript(clip, utterances, i + 1, output_dir)
     # Cleanup temp audio
     if os.path.exists(audio_path):
         os.remove(audio_path)
