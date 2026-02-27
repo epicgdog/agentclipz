@@ -4,6 +4,9 @@ from __future__ import annotations
 
 import asyncio
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 from rich.console import Console
 from rich.layout import Layout
@@ -173,8 +176,8 @@ async def _run_bot_and_dashboard(
             bot.analytics, config=config, channel=bot.channel_name,
         )
     except Exception as exc:
-        print(f"[clip-trigger] Could not start clip pipeline: {exc}")
-        print("[clip-trigger] Dashboard will run without clip recording.")
+        logger.error("[clip-trigger] Could not start clip pipeline: %s", exc)
+        logger.error("[clip-trigger] Dashboard will run without clip recording.")
 
     dashboard_task = asyncio.create_task(
         run_cli_dashboard(bot.analytics, refresh_interval, trigger=trigger)

@@ -64,6 +64,10 @@ class ChatAnalytics:
         self.top_n_keywords = top_n_keywords
         self._buffer: deque[_MessageEntry] = deque()
 
+    def clear(self) -> None:
+        """Clear all messages from the rolling window buffer."""
+        self._buffer.clear()
+
     # -- ingestion ---------------------------------------------------------
 
     def add_message(self, text: str, timestamp: float | None = None) -> None:

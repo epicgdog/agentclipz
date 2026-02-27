@@ -13,8 +13,8 @@ Real-time Twitch chat analytics: chat speed, top keywords, and sentiment — pow
 ### 2. Set environment variables
 
 ```bash
-export TWITCH_TOKEN="oauth:your_token_here"
-export TWITCH_CHANNEL="channel_name"
+export TWITCH_TOKEN="oauth:9q2ujthnied8jqfagwp86icp11ajrn"
+export TWITCH_CHANNEL="intnomore"
 ```
 
 ### 3. Install dependencies

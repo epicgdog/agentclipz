@@ -2,13 +2,5 @@ twitchio>=2.9,<3
 rich>=13.0
 certifi
 pytest>=8.0
-<<<<<<< HEAD
-streamlink
-numpy
-matplotlib
-requests
-aiohttp
-=======
 pandas>=2.0
 moviepy>=1.0
->>>>>>> 4bfa5eb2310d42873e2abaf761ce18d0a2b20c25
