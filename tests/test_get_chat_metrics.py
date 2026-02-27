@@ -14,16 +14,7 @@ class TestGetChatMetrics:
         assert "window_seconds" in metrics
         assert "messages_in_window" in metrics
         assert "messages_per_second" in metrics
-        assert "messages_per_minute" in metrics
         assert "top_keywords" in metrics
-        assert "sentiment" in metrics
-
-        s = metrics["sentiment"]
-        assert "avg_compound" in s
-        assert "positive_count" in s
-        assert "neutral_count" in s
-        assert "negative_count" in s
-        assert "total" in s
 
     def test_metrics_internal_consistency(self):
         a = ChatAnalytics(window_seconds=30)
@@ -36,8 +27,6 @@ class TestGetChatMetrics:
         assert metrics["window_seconds"] == 30
         assert metrics["messages_in_window"] == 15
         assert metrics["messages_per_second"] == round(15 / 30, 2)
-        assert metrics["messages_per_minute"] == round(15 / 30 * 60, 2)
-        assert metrics["sentiment"]["total"] == 15
 
     def test_empty_metrics(self):
         a = ChatAnalytics(window_seconds=60)
@@ -45,10 +34,7 @@ class TestGetChatMetrics:
 
         assert metrics["messages_in_window"] == 0
         assert metrics["messages_per_second"] == 0.0
-        assert metrics["messages_per_minute"] == 0.0
         assert metrics["top_keywords"] == []
-        assert metrics["sentiment"]["total"] == 0
-        assert metrics["sentiment"]["avg_compound"] == 0.0
 
     def test_keywords_are_list_of_tuples(self):
         a = ChatAnalytics(window_seconds=60)

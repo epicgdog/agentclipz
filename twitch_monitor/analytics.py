@@ -1,4 +1,4 @@
-"""Real-time chat analytics: speed, keywords, and sentiment over a rolling window."""
+"""Real-time chat analytics: speed and keywords over a rolling window."""
 
 from __future__ import annotations
 
@@ -6,10 +6,8 @@ import re
 import string
 import time
 from collections import Counter, deque
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
-
-from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 # ---------------------------------------------------------------------------
 # Configuration defaults
@@ -17,8 +15,6 @@ from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 DEFAULT_WINDOW_SECONDS = 60
 DEFAULT_TOP_N_KEYWORDS = 10
-SENTIMENT_POS_THRESHOLD = 0.05
-SENTIMENT_NEG_THRESHOLD = -0.05
 
 # ---------------------------------------------------------------------------
 # Lightweight stopwords (covers the most common English filler words)
@@ -50,7 +46,6 @@ _PUNCT_RE = re.compile(f"[{re.escape(string.punctuation)}]")
 class _MessageEntry:
     timestamp: float
     text: str
-    compound_score: float
 
 
 # ---------------------------------------------------------------------------
@@ -68,15 +63,13 @@ class ChatAnalytics:
         self.window_seconds = window_seconds
         self.top_n_keywords = top_n_keywords
         self._buffer: deque[_MessageEntry] = deque()
-        self._sentiment = SentimentIntensityAnalyzer()
 
     # -- ingestion ---------------------------------------------------------
 
     def add_message(self, text: str, timestamp: float | None = None) -> None:
-        """Record a new chat message and its sentiment score."""
+        """Record a new chat message."""
         ts = timestamp if timestamp is not None else time.time()
-        compound = self._sentiment.polarity_scores(text)["compound"]
-        self._buffer.append(_MessageEntry(timestamp=ts, text=text, compound_score=compound))
+        self._buffer.append(_MessageEntry(timestamp=ts, text=text))
 
     # -- pruning -----------------------------------------------------------
 
@@ -95,7 +88,6 @@ class ChatAnalytics:
         return {
             "messages_in_window": count,
             "messages_per_second": round(mps, 2),
-            "messages_per_minute": round(mps * 60, 2),
         }
 
     # -- keyword extraction ------------------------------------------------
@@ -116,41 +108,6 @@ class ChatAnalytics:
             counter.update(self._tokenize(entry.text))
         return counter.most_common(n)
 
-    # -- sentiment ---------------------------------------------------------
-
-    def compute_sentiment(self, now: float | None = None) -> dict[str, Any]:
-        now = now or time.time()
-        self._prune(now)
-
-        if not self._buffer:
-            return {
-                "avg_compound": 0.0,
-                "positive_count": 0,
-                "neutral_count": 0,
-                "negative_count": 0,
-                "total": 0,
-            }
-
-        pos = neu = neg = 0
-        total_compound = 0.0
-        for entry in self._buffer:
-            total_compound += entry.compound_score
-            if entry.compound_score >= SENTIMENT_POS_THRESHOLD:
-                pos += 1
-            elif entry.compound_score <= SENTIMENT_NEG_THRESHOLD:
-                neg += 1
-            else:
-                neu += 1
-
-        count = len(self._buffer)
-        return {
-            "avg_compound": round(total_compound / count, 4),
-            "positive_count": pos,
-            "neutral_count": neu,
-            "negative_count": neg,
-            "total": count,
-        }
-
     # -- unified metrics ---------------------------------------------------
 
     def get_chat_metrics(self, now: float | None = None) -> dict[str, Any]:
@@ -161,5 +118,4 @@ class ChatAnalytics:
             "window_seconds": self.window_seconds,
             **self.compute_chat_speed(now),
             "top_keywords": self.compute_top_keywords(now=now),
-            "sentiment": self.compute_sentiment(now),
         }

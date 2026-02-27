@@ -5,10 +5,14 @@ from __future__ import annotations
 import asyncio
 import os
 import time
+from typing import TYPE_CHECKING
 
 from twitchio.ext import commands
 
 from .analytics import ChatAnalytics
+
+if TYPE_CHECKING:
+    from .clip_trigger import ClipTrigger
 
 # ---------------------------------------------------------------------------
 # Configuration (override via env vars or constructor args)
@@ -31,10 +35,12 @@ class ChatMonitorBot(commands.Bot):
         window_seconds: int = DEFAULT_WINDOW_SECONDS,
         top_n_keywords: int = DEFAULT_TOP_N_KEYWORDS,
         report_interval: int = DEFAULT_REPORT_INTERVAL,
+        clip_trigger: ClipTrigger | None = None,
     ) -> None:
         self._twitch_token = token or os.environ["TWITCH_TOKEN"]
         self._channel = channel or os.environ["TWITCH_CHANNEL"]
         self.report_interval = report_interval
+        self.clip_trigger = clip_trigger
 
         super().__init__(
             token=self._twitch_token,
@@ -46,6 +52,10 @@ class ChatMonitorBot(commands.Bot):
             window_seconds=window_seconds,
             top_n_keywords=top_n_keywords,
         )
+
+    @property
+    def channel_name(self) -> str:
+        return self._channel
 
     # -- lifecycle events --------------------------------------------------
 
@@ -80,27 +90,17 @@ class ChatMonitorBot(commands.Bot):
     @staticmethod
     def _print_metrics(m: dict) -> None:
         speed = (
-            f"{m['messages_per_minute']:.1f} msg/min "
-            f"({m['messages_per_second']:.2f} msg/s, "
-            f"{m['messages_in_window']} in window)"
+            f"{m['messages_per_second']:.2f} msg/s, "
+            f"{m['messages_in_window']} in window"
         )
 
         kw = ", ".join(f"{word}({count})" for word, count in m["top_keywords"][:5])
         if not kw:
             kw = "(none yet)"
 
-        s = m["sentiment"]
-        sentiment = (
-            f"avg={s['avg_compound']:+.3f}  "
-            f"+{s['positive_count']} / "
-            f"~{s['neutral_count']} / "
-            f"-{s['negative_count']}"
-        )
-
         print(
             f"\n{'=' * 60}\n"
             f"  Speed:     {speed}\n"
             f"  Keywords:  {kw}\n"
-            f"  Sentiment: {sentiment}\n"
             f"{'=' * 60}"
         )

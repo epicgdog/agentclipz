@@ -1,5 +1,9 @@
 twitchio>=2.9,<3
-vaderSentiment>=3.3.2
 rich>=13.0
 certifi
 pytest>=8.0
+streamlink
+numpy
+matplotlib
+requests
+aiohttp

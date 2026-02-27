@@ -11,5 +11,14 @@ if not _os.path.exists(_ssl.get_default_verify_paths().openssl_cafile or ""):
 from .analytics import ChatAnalytics
 from .bot import ChatMonitorBot
 from .interface_cli import run_cli_dashboard
+from .clip_trigger import ClipTrigger, ClipTriggerConfig, StreamBuffer, TriggerState
 
-__all__ = ["ChatAnalytics", "ChatMonitorBot", "run_cli_dashboard"]
+__all__ = [
+    "ChatAnalytics",
+    "ChatMonitorBot",
+    "run_cli_dashboard",
+    "ClipTrigger",
+    "ClipTriggerConfig",
+    "StreamBuffer",
+    "TriggerState",
+]

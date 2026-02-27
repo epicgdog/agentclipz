@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 import os
-import time
 
 from rich.console import Console
 from rich.layout import Layout
@@ -18,21 +17,8 @@ from .analytics import ChatAnalytics
 DEFAULT_REFRESH_INTERVAL = 3.0
 
 
-def _sentiment_color(score: float) -> str:
-    if score >= 0.25:
-        return "bright_green"
-    if score >= 0.05:
-        return "green"
-    if score > -0.05:
-        return "yellow"
-    if score > -0.25:
-        return "red"
-    return "bright_red"
-
-
 def _build_speed_panel(metrics: dict) -> Panel:
     mps = metrics["messages_per_second"]
-    mpm = metrics["messages_per_minute"]
     total = metrics["messages_in_window"]
     window = metrics["window_seconds"]
 
@@ -41,11 +27,10 @@ def _build_speed_panel(metrics: dict) -> Panel:
     table.add_column()
 
     table.add_row("Messages/sec", f"[cyan]{mps:.2f}[/]")
-    table.add_row("Messages/min", f"[cyan]{mpm:.1f}[/]")
     table.add_row("In window", f"[cyan]{total}[/]")
     table.add_row("Window size", f"[dim]{window}s[/]")
 
-    bar_len = min(int(mpm), 50)
+    bar_len = min(int(mps * 60), 50)
     bar = "█" * bar_len + "░" * (50 - bar_len)
     table.add_row("Activity", f"[cyan]{bar}[/]")
 
@@ -82,49 +67,39 @@ def _build_keywords_panel(metrics: dict) -> Panel:
     return Panel(table, title="[bold white]Top Keywords[/]", border_style="magenta")
 
 
-def _build_sentiment_panel(metrics: dict) -> Panel:
-    s = metrics["sentiment"]
-    avg = s["avg_compound"]
-    pos = s["positive_count"]
-    neu = s["neutral_count"]
-    neg = s["negative_count"]
-    total = s["total"]
+def _build_clip_trigger_panel(trigger) -> Panel:
+    """Build a small status panel for the clip-trigger state machine."""
+    from .clip_trigger import TriggerState
 
-    color = _sentiment_color(avg)
+    state = trigger.state if trigger else TriggerState.IDLE
+    clips = trigger.clip_count if trigger else 0
+    last_info = trigger._last_clip_info if trigger else ""
+
+    state_color = {
+        TriggerState.IDLE: "green",
+        TriggerState.RECORDING: "bold red",
+        TriggerState.PROCESSING: "bold yellow",
+    }.get(state, "white")
 
     table = Table.grid(padding=(0, 2))
     table.add_column(justify="right", style="bold")
     table.add_column()
 
-    if avg >= 0.05:
-        label = "Positive"
-    elif avg <= -0.05:
-        label = "Negative"
-    else:
-        label = "Neutral"
+    table.add_row("State", f"[{state_color}]{state.value}[/]")
+    table.add_row("Clips", f"[cyan]{clips}[/]")
 
-    table.add_row("Avg compound", f"[{color}]{avg:+.4f}[/]")
-    table.add_row("Mood", f"[{color} bold]{label}[/]")
-    table.add_row("", "")
+    if trigger:
+        cfg = trigger.config
+        table.add_row("Start ≥", f"[dim]{cfg.start_mps:.1f} msg/s[/]")
+        table.add_row("Stop ≤", f"[dim]{cfg.stop_mps:.1f} msg/s[/]")
 
-    total_safe = total or 1
-    pos_pct = pos / total_safe * 100
-    neu_pct = neu / total_safe * 100
-    neg_pct = neg / total_safe * 100
+    if last_info:
+        table.add_row("Last", f"[dim]{last_info}[/]")
 
-    table.add_row("Positive", f"[green]{pos}[/] [dim]({pos_pct:.0f}%)[/]")
-    table.add_row("Neutral", f"[yellow]{neu}[/] [dim]({neu_pct:.0f}%)[/]")
-    table.add_row("Negative", f"[red]{neg}[/] [dim]({neg_pct:.0f}%)[/]")
-
-    pos_bar = "+" * min(int(pos_pct / 2), 50)
-    neu_bar = "~" * min(int(neu_pct / 2), 50)
-    neg_bar = "-" * min(int(neg_pct / 2), 50)
-    table.add_row("", f"[green]{pos_bar}[/][yellow]{neu_bar}[/][red]{neg_bar}[/]")
-
-    return Panel(table, title="[bold white]Sentiment[/]", border_style=color)
+    return Panel(table, title="[bold white]Clip Trigger[/]", border_style="red")
 
 
-def build_dashboard(metrics: dict) -> Layout:
+def build_dashboard(metrics: dict, trigger=None) -> Layout:
     """Build a full Rich Layout from a metrics dict."""
     layout = Layout()
     layout.split_column(
@@ -154,15 +129,10 @@ def build_dashboard(metrics: dict) -> Layout:
     )
 
     layout["body"].split_row(
-        Layout(name="left"),
-        Layout(name="right"),
+        Layout(_build_speed_panel(metrics), name="speed", ratio=1),
+        Layout(_build_keywords_panel(metrics), name="keywords", ratio=2),
+        Layout(_build_clip_trigger_panel(trigger), name="trigger", ratio=1),
     )
-
-    layout["left"].split_column(
-        Layout(_build_speed_panel(metrics), name="speed"),
-        Layout(_build_sentiment_panel(metrics), name="sentiment"),
-    )
-    layout["right"].update(_build_keywords_panel(metrics))
 
     return layout
 
@@ -170,6 +140,7 @@ def build_dashboard(metrics: dict) -> Layout:
 async def run_cli_dashboard(
     analytics: ChatAnalytics,
     refresh_interval: float = DEFAULT_REFRESH_INTERVAL,
+    trigger=None,
 ) -> None:
     """Run the Rich live dashboard, refreshing on a fixed interval."""
     console = Console()
@@ -177,27 +148,44 @@ async def run_cli_dashboard(
     with Live(console=console, refresh_per_second=2, screen=True) as live:
         while True:
             metrics = analytics.get_chat_metrics()
-            live.update(build_dashboard(metrics))
+            live.update(build_dashboard(metrics, trigger=trigger))
             await asyncio.sleep(refresh_interval)
 
 
 async def _run_bot_and_dashboard(
     refresh_interval: float = DEFAULT_REFRESH_INTERVAL,
 ) -> None:
-    """Start the TwitchIO bot and the CLI dashboard concurrently."""
+    """Start the TwitchIO bot, the clip-trigger pipeline, and the CLI dashboard."""
     from .bot import ChatMonitorBot
+    from .clip_trigger import ClipTriggerConfig, run_clip_pipeline
 
     bot = ChatMonitorBot()
-    bot.report_interval = 0  # disable plain-text reporting when CLI is active
+    bot.report_interval = 0
+
+    trigger = None
+    buf = None
+    config = ClipTriggerConfig()
+    stream_url = config.stream_url or f"https://twitch.tv/{bot.channel_name}"
+    config.stream_url = stream_url
+
+    try:
+        buf, trigger = await run_clip_pipeline(
+            bot.analytics, config=config, channel=bot.channel_name,
+        )
+    except Exception as exc:
+        print(f"[clip-trigger] Could not start clip pipeline: {exc}")
+        print("[clip-trigger] Dashboard will run without clip recording.")
 
     dashboard_task = asyncio.create_task(
-        run_cli_dashboard(bot.analytics, refresh_interval)
+        run_cli_dashboard(bot.analytics, refresh_interval, trigger=trigger)
     )
 
     try:
         await bot.start()
     finally:
         dashboard_task.cancel()
+        if buf:
+            await buf.stop()
 
 
 def main() -> None:

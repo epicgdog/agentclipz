@@ -30,7 +30,6 @@ class TestBufferPruning:
         metrics = a.get_chat_metrics(now=1000.0)
         assert metrics["messages_in_window"] == 0
         assert metrics["messages_per_second"] == 0.0
-        assert metrics["messages_per_minute"] == 0.0
 
     def test_boundary_message_is_pruned(self):
         """A message strictly older than the window is pruned; one at the
@@ -59,7 +58,6 @@ class TestChatSpeed:
         speed = a.compute_chat_speed(now=now)
         assert speed["messages_in_window"] == 30
         assert speed["messages_per_second"] == 0.5
-        assert speed["messages_per_minute"] == 30.0
 
     def test_speed_after_pruning(self):
         a = ChatAnalytics(window_seconds=10)
@@ -70,4 +68,3 @@ class TestChatSpeed:
         speed = a.compute_chat_speed(now=now)
         assert speed["messages_in_window"] == 10
         assert speed["messages_per_second"] == 1.0
-        assert speed["messages_per_minute"] == 60.0
