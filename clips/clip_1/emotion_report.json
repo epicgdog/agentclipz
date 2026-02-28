@@ -1,17 +1,17 @@
 {
   "video": "raw_clip_1.mp4",
-  "utterance_count": 18,
+  "utterance_count": 1,
   "emotions": {
-    "Calm": 10,
-    "Neutral": 3,
-    "Amused": 2,
-    "Happy": 1,
-    "Excited": 1,
-    "Frustrated": 1,
+    "Neutral": 1,
+    "Calm": 0,
+    "Happy": 0,
+    "Amused": 0,
+    "Excited": 0,
     "Proud": 0,
     "Affectionate": 0,
     "Interested": 0,
     "Hopeful": 0,
+    "Frustrated": 0,
     "Angry": 0,
     "Contemptuous": 0,
     "Concerned": 0,
@@ -31,130 +31,11 @@
   },
   "utterances": [
     {
-      "text": "Okay, this'll work. Um, I don't know. I'll take a look later.",
-      "start_ms": 7380,
-      "duration_ms": 5760,
-      "emotion": "Calm",
-      "emotion_score": 0.15
-    },
-    {
-      "text": "Is it pushing yet?",
-      "start_ms": 13140,
-      "duration_ms": 480,
-      "emotion": "Calm",
-      "emotion_score": 0.15
-    },
-    {
-      "text": "Hmm? No, no, no, diciamo proprio no, bro. Nah.",
-      "start_ms": 13980,
-      "duration_ms": 2940,
+      "text": "And here's our boys, Joel and Brandon.",
+      "start_ms": 46140,
+      "duration_ms": 1260,
       "emotion": "Neutral",
       "emotion_score": 0.1
-    },
-    {
-      "text": "Is it working?",
-      "start_ms": 17100,
-      "duration_ms": 660,
-      "emotion": "Calm",
-      "emotion_score": 0.15
-    },
-    {
-      "text": "Nah, not yet, bro.",
-      "start_ms": 18060,
-      "duration_ms": 840,
-      "emotion": "Calm",
-      "emotion_score": 0.15
-    },
-    {
-      "text": "Oh, man.",
-      "start_ms": 19080,
-      "duration_ms": 480,
-      "emotion": "Neutral",
-      "emotion_score": 0.1
-    },
-    {
-      "text": "It's kind of\u2014",
-      "start_ms": 19980,
-      "duration_ms": 420,
-      "emotion": "Calm",
-      "emotion_score": 0.15
-    },
-    {
-      "text": "I don't know. I'll call by again. \u0905\u091a\u094d\u091b\u093e \u0920\u0940\u0915 \u0939\u0948",
-      "start_ms": 20520,
-      "duration_ms": 1440,
-      "emotion": "Calm",
-      "emotion_score": 0.15
-    },
-    {
-      "text": "I guess I'll call by. Maybe we'll have a demo. El trabajo es muy bueno, la verdad.",
-      "start_ms": 22080,
-      "duration_ms": 1740,
-      "emotion": "Neutral",
-      "emotion_score": 0.1
-    },
-    {
-      "text": "I'll see you.",
-      "start_ms": 23880,
-      "duration_ms": 1140,
-      "emotion": "Calm",
-      "emotion_score": 0.15
-    },
-    {
-      "text": "Bro, am I happy or what, bro?",
-      "start_ms": 29400,
-      "duration_ms": 1380,
-      "emotion": "Calm",
-      "emotion_score": 0.15
-    },
-    {
-      "text": "Some high-end coding.",
-      "start_ms": 31260,
-      "duration_ms": 840,
-      "emotion": "Calm",
-      "emotion_score": 0.15
-    },
-    {
-      "text": "I'm so happy right now. I'm so happy, bro. Yeah! Woo! Hell yeah, bro.",
-      "start_ms": 32220,
-      "duration_ms": 6360,
-      "emotion": "Happy",
-      "emotion_score": 0.6
-    },
-    {
-      "text": "This is awesome.",
-      "start_ms": 39360,
-      "duration_ms": 840,
-      "emotion": "Calm",
-      "emotion_score": 0.15
-    },
-    {
-      "text": "Awesome. Oh yeah, I removed the spam filter, so now you can just spam as many messages as you want.",
-      "start_ms": 40620,
-      "duration_ms": 5040,
-      "emotion": "Amused",
-      "emotion_score": 0.7
-    },
-    {
-      "text": "Yeah, awesome. Oh, dick.",
-      "start_ms": 45840,
-      "duration_ms": 1980,
-      "emotion": "Amused",
-      "emotion_score": 0.7
-    },
-    {
-      "text": "Yeah. They just made testing way harder, bro, I swear.",
-      "start_ms": 48120,
-      "duration_ms": 4080,
-      "emotion": "Frustrated",
-      "emotion_score": 0.85
-    },
-    {
-      "text": "Yeah.",
-      "start_ms": 52500,
-      "duration_ms": 180,
-      "emotion": "Excited",
-      "emotion_score": 1.0
     }
   ]
 }

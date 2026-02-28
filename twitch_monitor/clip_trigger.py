@@ -30,6 +30,7 @@ if TYPE_CHECKING:
     from .analytics import ChatAnalytics
 
 from .clipper import analyze_emotions, _generate_srt_from_utterances, burn_subtitles_to_video
+from publisher.main import publish_highlight
 
 logger = logging.getLogger(__name__)
 
@@ -461,6 +462,27 @@ class ClipTrigger:
                 except Exception:
                     logger.exception("[trigger] Failed to burn subtitles")
             
+            # Auto-publish to Instagram with Reka-generated caption
+            subtitled_path = clip_path.replace(".mp4", "_subtitled.mp4")
+            if not os.path.exists(subtitled_path):
+                logger.warning("[trigger] Subtitled clip not found, skipping Instagram upload")
+            else:
+                logger.info("[trigger] Publishing subtitled clip to Instagram...")
+                try:
+                    emotion_report = os.path.join(clip_dir, "emotion_report.json")
+                    emotion_path = emotion_report if os.path.exists(emotion_report) else None
+
+                    await loop.run_in_executor(
+                        None,
+                        publish_highlight,
+                        subtitled_path,
+                        emotion_path,
+                        None,  # no custom caption — let Reka generate it
+                    )
+                    logger.info("[trigger] Clip published to Instagram!")
+                except Exception:
+                    logger.exception("[trigger] Failed to publish to Instagram")
+
             self._last_clip_info = f"Clip #{self.clip_count}: {summary}"
         except Exception:
             logger.exception("[trigger] Error analyzing clip")
