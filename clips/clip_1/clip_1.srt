@@ -1,3 +1,139 @@
 1
-00:00:46,140 --> 00:00:47,400
-And here's our boys, Joel and Brandon.
+00:00:00,420 --> 00:00:01,200
+Why is it not working?
+
+2
+00:00:01,440 --> 00:00:02,160
+What's wrong with it?
+
+3
+00:00:03,480 --> 00:00:04,560
+Okay, I'm a researcher, of course. I'm going to restart the clip.
+
+4
+00:00:06,420 --> 00:00:08,880
+Okay. Wait, wait, let's just let's just wait.
+
+5
+00:00:15,000 --> 00:00:15,900
+Okay, now it's working.
+
+6
+00:00:16,020 --> 00:00:17,520
+Okay. Hi, I think yours wasn't working.
+
+7
+00:00:17,700 --> 00:00:18,900
+Yeah, reload the page, reload the page.
+
+8
+00:00:19,020 --> 00:00:19,800
+Did you get timed out?
+
+9
+00:00:20,100 --> 00:00:21,720
+No. What's happening, mate? I was stopping the clip.
+
+10
+00:00:21,780 --> 00:00:22,860
+I don't see any of it on my screen.
+
+11
+00:00:22,860 --> 00:00:23,880
+I don't see any of your messages.
+
+12
+00:00:24,060 --> 00:00:25,560
+Yes, now you got shuttle bundles. Shall we go to the solution?
+
+13
+00:00:25,620 --> 00:00:27,000
+No, no, I just reloaded the page, I think.
+
+14
+00:00:28,860 --> 00:00:30,120
+Okay. I'm going to start recording?
+
+15
+00:00:30,240 --> 00:00:31,020
+Yeah. Okay.
+
+16
+00:00:31,500 --> 00:00:34,620
+See you now. Let's just hear it, let's just hear it out. I start streaming, start streaming.
+
+17
+00:00:34,680 --> 00:00:35,760
+No, no, no, I don't see it, bro.
+
+18
+00:00:36,000 --> 00:00:37,020
+All right, I'll go like this.
+
+19
+00:00:37,800 --> 00:00:38,820
+Dude, I actually don't see it.
+
+20
+00:00:39,480 --> 00:00:40,140
+I don't see anything.
+
+21
+00:00:40,560 --> 00:00:41,280
+Yeah, I don't see anything.
+
+22
+00:00:41,280 --> 00:00:41,940
+Buenos días. I got shuttle bundles.
+
+23
+00:00:42,360 --> 00:00:43,200
+He got banned.
+
+24
+00:00:43,320 --> 00:00:44,220
+He got banned, bro.
+
+25
+00:00:49,920 --> 00:00:51,780
+Okay, we have 9 minutes to submit for the video.
+
+26
+00:00:51,900 --> 00:00:52,500
+Yeah, yeah, yeah.
+
+27
+00:00:52,920 --> 00:00:53,040
+Okay.
+
+28
+00:00:54,300 --> 00:00:55,920
+Three, two, one, go.
+
+29
+00:00:56,040 --> 00:00:56,580
+Hey guys.
+
+30
+00:00:56,640 --> 00:00:57,240
+What's up? Bonsoir.
+
+31
+00:00:57,360 --> 00:01:07,440
+We're at the AWS Hackathon. We're getting happy. We're getting hyped, right? We're here with the team. We're Brandon right there. We got Gerard. We got Joel, right? And I'm Matthew, right?
+
+32
+00:01:07,680 --> 00:01:07,980
+Hell yeah.
+
+33
+00:01:08,100 --> 00:01:14,040
+We got the chatters in the chat right now, right? Those messages, those W's in the chat are going up right now, right?
+
+34
+00:01:14,160 --> 00:01:14,580
+In the chat.
+
+35
+00:01:14,700 --> 00:01:35,280
+W's in the chat, right? Those messages per second are rising right now. And there, we just generated our first viral clip, right? Status is recording. It's creating that clip, right? So we should see in a second right here once that chats per second go down from 0.45.

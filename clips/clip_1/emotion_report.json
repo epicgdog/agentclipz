@@ -1,12 +1,13 @@
 {
   "video": "raw_clip_1.mp4",
-  "utterance_count": 1,
+  "utterance_count": 35,
   "emotions": {
-    "Neutral": 1,
-    "Calm": 0,
-    "Happy": 0,
-    "Amused": 0,
-    "Excited": 0,
+    "Excited": 13,
+    "Neutral": 12,
+    "Calm": 5,
+    "Happy": 2,
+    "Amused": 2,
+    "Surprised": 1,
     "Proud": 0,
     "Affectionate": 0,
     "Interested": 0,
@@ -20,7 +21,6 @@
     "Ashamed": 0,
     "Bored": 0,
     "Tired": 0,
-    "Surprised": 0,
     "Anxious": 0,
     "Stressed": 0,
     "Disgusted": 0,
@@ -31,11 +31,249 @@
   },
   "utterances": [
     {
-      "text": "And here's our boys, Joel and Brandon.",
-      "start_ms": 46140,
+      "text": "Why is it not working?",
+      "start_ms": 420,
+      "duration_ms": 780,
+      "emotion": "Neutral",
+      "emotion_score": 0.1
+    },
+    {
+      "text": "What's wrong with it?",
+      "start_ms": 1440,
+      "duration_ms": 720,
+      "emotion": "Excited",
+      "emotion_score": 1.0
+    },
+    {
+      "text": "Okay, I'm a researcher, of course. I'm going to restart the clip.",
+      "start_ms": 3480,
+      "duration_ms": 1080,
+      "emotion": "Neutral",
+      "emotion_score": 0.1
+    },
+    {
+      "text": "Okay. Wait, wait, let's just let's just wait.",
+      "start_ms": 6420,
+      "duration_ms": 2460,
+      "emotion": "Excited",
+      "emotion_score": 1.0
+    },
+    {
+      "text": "Okay, now it's working.",
+      "start_ms": 15000,
+      "duration_ms": 900,
+      "emotion": "Neutral",
+      "emotion_score": 0.1
+    },
+    {
+      "text": "Okay. Hi, I think yours wasn't working.",
+      "start_ms": 16020,
+      "duration_ms": 1500,
+      "emotion": "Amused",
+      "emotion_score": 0.7
+    },
+    {
+      "text": "Yeah, reload the page, reload the page.",
+      "start_ms": 17700,
+      "duration_ms": 1200,
+      "emotion": "Neutral",
+      "emotion_score": 0.1
+    },
+    {
+      "text": "Did you get timed out?",
+      "start_ms": 19020,
+      "duration_ms": 780,
+      "emotion": "Excited",
+      "emotion_score": 1.0
+    },
+    {
+      "text": "No. What's happening, mate? I was stopping the clip.",
+      "start_ms": 20100,
+      "duration_ms": 1620,
+      "emotion": "Surprised",
+      "emotion_score": 0.9
+    },
+    {
+      "text": "I don't see any of it on my screen.",
+      "start_ms": 21780,
+      "duration_ms": 1080,
+      "emotion": "Neutral",
+      "emotion_score": 0.1
+    },
+    {
+      "text": "I don't see any of your messages.",
+      "start_ms": 22860,
+      "duration_ms": 1020,
+      "emotion": "Excited",
+      "emotion_score": 1.0
+    },
+    {
+      "text": "Yes, now you got shuttle bundles. Shall we go to the solution?",
+      "start_ms": 24060,
+      "duration_ms": 1500,
+      "emotion": "Neutral",
+      "emotion_score": 0.1
+    },
+    {
+      "text": "No, no, I just reloaded the page, I think.",
+      "start_ms": 25620,
+      "duration_ms": 1380,
+      "emotion": "Excited",
+      "emotion_score": 1.0
+    },
+    {
+      "text": "Okay. I'm going to start recording?",
+      "start_ms": 28860,
       "duration_ms": 1260,
       "emotion": "Neutral",
       "emotion_score": 0.1
+    },
+    {
+      "text": "Yeah. Okay.",
+      "start_ms": 30240,
+      "duration_ms": 780,
+      "emotion": "Happy",
+      "emotion_score": 0.6
+    },
+    {
+      "text": "See you now. Let's just hear it, let's just hear it out. I start streaming, start streaming.",
+      "start_ms": 31500,
+      "duration_ms": 3120,
+      "emotion": "Neutral",
+      "emotion_score": 0.1
+    },
+    {
+      "text": "No, no, no, I don't see it, bro.",
+      "start_ms": 34680,
+      "duration_ms": 1080,
+      "emotion": "Excited",
+      "emotion_score": 1.0
+    },
+    {
+      "text": "All right, I'll go like this.",
+      "start_ms": 36000,
+      "duration_ms": 1020,
+      "emotion": "Neutral",
+      "emotion_score": 0.1
+    },
+    {
+      "text": "Dude, I actually don't see it.",
+      "start_ms": 37800,
+      "duration_ms": 1020,
+      "emotion": "Excited",
+      "emotion_score": 1.0
+    },
+    {
+      "text": "I don't see anything.",
+      "start_ms": 39480,
+      "duration_ms": 660,
+      "emotion": "Neutral",
+      "emotion_score": 0.1
+    },
+    {
+      "text": "Yeah, I don't see anything.",
+      "start_ms": 40560,
+      "duration_ms": 720,
+      "emotion": "Excited",
+      "emotion_score": 1.0
+    },
+    {
+      "text": "Buenos d\u00edas. I got shuttle bundles.",
+      "start_ms": 41280,
+      "duration_ms": 660,
+      "emotion": "Amused",
+      "emotion_score": 0.7
+    },
+    {
+      "text": "He got banned.",
+      "start_ms": 42360,
+      "duration_ms": 840,
+      "emotion": "Happy",
+      "emotion_score": 0.6
+    },
+    {
+      "text": "He got banned, bro.",
+      "start_ms": 43320,
+      "duration_ms": 900,
+      "emotion": "Neutral",
+      "emotion_score": 0.1
+    },
+    {
+      "text": "Okay, we have 9 minutes to submit for the video.",
+      "start_ms": 49920,
+      "duration_ms": 1860,
+      "emotion": "Excited",
+      "emotion_score": 1.0
+    },
+    {
+      "text": "Yeah, yeah, yeah.",
+      "start_ms": 51900,
+      "duration_ms": 600,
+      "emotion": "Calm",
+      "emotion_score": 0.15
+    },
+    {
+      "text": "Okay.",
+      "start_ms": 52920,
+      "duration_ms": 120,
+      "emotion": "Calm",
+      "emotion_score": 0.15
+    },
+    {
+      "text": "Three, two, one, go.",
+      "start_ms": 54300,
+      "duration_ms": 1620,
+      "emotion": "Neutral",
+      "emotion_score": 0.1
+    },
+    {
+      "text": "Hey guys.",
+      "start_ms": 56040,
+      "duration_ms": 540,
+      "emotion": "Excited",
+      "emotion_score": 1.0
+    },
+    {
+      "text": "What's up? Bonsoir.",
+      "start_ms": 56640,
+      "duration_ms": 600,
+      "emotion": "Calm",
+      "emotion_score": 0.15
+    },
+    {
+      "text": "We're at the AWS Hackathon. We're getting happy. We're getting hyped, right? We're here with the team. We're Brandon right there. We got Gerard. We got Joel, right? And I'm Matthew, right?",
+      "start_ms": 57360,
+      "duration_ms": 10080,
+      "emotion": "Excited",
+      "emotion_score": 1.0
+    },
+    {
+      "text": "Hell yeah.",
+      "start_ms": 67680,
+      "duration_ms": 300,
+      "emotion": "Calm",
+      "emotion_score": 0.15
+    },
+    {
+      "text": "We got the chatters in the chat right now, right? Those messages, those W's in the chat are going up right now, right?",
+      "start_ms": 68100,
+      "duration_ms": 5940,
+      "emotion": "Excited",
+      "emotion_score": 1.0
+    },
+    {
+      "text": "In the chat.",
+      "start_ms": 74160,
+      "duration_ms": 420,
+      "emotion": "Calm",
+      "emotion_score": 0.15
+    },
+    {
+      "text": "W's in the chat, right? Those messages per second are rising right now. And there, we just generated our first viral clip, right? Status is recording. It's creating that clip, right? So we should see in a second right here once that chats per second go down from 0.45.",
+      "start_ms": 74700,
+      "duration_ms": 20580,
+      "emotion": "Excited",
+      "emotion_score": 1.0
     }
   ]
 }
